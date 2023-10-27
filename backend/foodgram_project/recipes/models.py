@@ -1,10 +1,16 @@
 from django.db import models
+
+from recipes.managers import (FavoritedManager,
+                              FavoritedStatus,
+                              ShoppingManager,
+                              ShoppingStatus)
 from users.models import User
 
 
-class Ingredients(models.Model):
-    """Модель ингредиетов."""
-
+class Ingredient(models.Model):
+    """
+    Модель ингредиетов.
+    """
     name = models.CharField(
         max_length=200,
         verbose_name='Название ингредиента'
@@ -23,13 +29,21 @@ class Ingredients(models.Model):
 
 
 class Tag(models.Model):
-    """Модель тегов."""
-
-    name = models.CharField(max_length=200, verbose_name='Имя тега')
-    color = models.CharField(max_length=7, verbose_name='Цвет тега')
+    """
+    Модель тегов.
+    """
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Имя тега'
+    )
+    color = models.CharField(
+        max_length=7,
+        verbose_name='Цвет тега'
+    )
     slug = models.SlugField(
         max_length=200,
         unique=True,
+        db_index=True,
         verbose_name='Слаг тега'
     )
 
@@ -56,18 +70,18 @@ class Recipe(models.Model):
         verbose_name='Автор рецепта'
     )
     ingredients = models.ManyToManyField(
-        to=Ingredients,
-        blank=True,
-        null=True,
+        to=Ingredient,
         related_name='recipes',
         verbose_name='Список ингредиентов'
     )
     is_favorited = models.BooleanField(
-        default=False,
+        choices=FavoritedStatus.choices,
+        default=FavoritedStatus.UNFAVORITED,
         verbose_name='Находится ли в избранном'
-        )
+    )
     is_in_shopping_cart = models.BooleanField(
-        default=False,
+        choices=ShoppingStatus.choices,
+        default=ShoppingStatus.OUTBASKET,
         verbose_name='Находится ли в корзине'
     )
     name = models.CharField(
@@ -92,6 +106,10 @@ class Recipe(models.Model):
         verbose_name='Дата публикации'
     )
 
+    objects = models.Manager()
+    favorited = FavoritedManager()
+    inbasket = ShoppingManager()
+
     def __str__(self):
         return self.name
 
@@ -101,8 +119,9 @@ class Recipe(models.Model):
 
 
 class Follow(models.Model):
-    """Модель подписчиков."""
-
+    """
+    Модель подписчиков.
+    """
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -119,11 +138,36 @@ class Follow(models.Model):
     class Meta:
         verbose_name = 'Подписчик'
         verbose_name_plural = 'Подписчики'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'author'),
+                name='unique_follow'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.author}'
 
 
 class TagRecipe(models.Model):
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    tag = models.ForeignKey(
+        to=Tag,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('tag', 'recipe'),
+                name='unique_tagrecipe'
+            )
+        ]
 
     def __str__(self):
         return f'{self.tag} {self.recipe}'
