@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
@@ -6,7 +5,8 @@ from api.serializers import (FollowSerializer,
                              IngredientSerializer,
                              RecipeSerializer,
                              TagSerializer)
-from recipes.models import Follow, Ingredient, Recipe, Tag
+from recipes.models import Ingredient, Recipe, Tag
+from users.models import Follow
 
 
 class RecipeViewSet(ModelViewSet):
