@@ -115,15 +115,16 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
-    'DEFAULT_PAGINATION_CLASS': [
-        'api.pagination.CustomPaginator',
-    ],
-    'PAGE_SIZE': 10,
-    'SEARCH_PARAM': 'name',
 }
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
+    'SERIALIZERS': {
+        'user': 'api.serializers.UserListSerializer',
+        'user_list': 'api.serializers.UserListSerializer',
+        'current_user': 'api.serializers.UserListSerializer',
+        'set_password': 'api.serializers.SetPasswordSerializer'
+    },
 }
 
 FILE_NAME = 'ShoppingСart.txt'
