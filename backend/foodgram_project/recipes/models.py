@@ -151,7 +151,7 @@ class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
         to=Ingredient,
         on_delete=models.CASCADE,
-        related_name='recipe_ingridient',
+        related_name='ingridient_recipe',
         verbose_name='Ингредиент'
     )
     amount = models.PositiveSmallIntegerField(

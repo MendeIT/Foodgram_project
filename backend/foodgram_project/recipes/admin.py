@@ -11,8 +11,10 @@ from users.models import Follow, User
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'first_name', 'last_name', 'email')
+    list_display = ('id', 'username', 'first_name', 'last_name',
+                    'email', 'password', 'date_joined')
     search_fields = ('username', 'first_name', 'last_name', 'email')
+    list_editable = ('password',)
     list_filter = ('id',)
 
 

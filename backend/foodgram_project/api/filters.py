@@ -22,16 +22,18 @@ class RecipeFilter(FilterSet):
 
     def is_favorited_filter(self, queryset, name, value):
         user = self.request.user
+        limit = self.request.GET.get('is_favorited')
 
         if value and user.is_authenticated:
-            return queryset.filter(favorite_recipe__user=user)
+            return queryset.filter(favorites__user=user)[:int(limit)]
 
         return queryset
 
     def is_in_shopping_cart_filter(self, queryset, name, value):
         user = self.request.user
+        limit = self.request.GET.get('is_in_shopping_cart')
 
         if value and user.is_authenticated:
-            return queryset.filter(shopping_recipe__user=user)
+            return queryset.filter(shoppingcart__user=user)[:int(limit)]
 
         return queryset
