@@ -51,10 +51,10 @@ class UserViewSet(CreateModelMixin,
         return UserCreateSerializer
 
     @action(
-            detail=False,
-            methods=['get'],
-            pagination_class=None,
-            permission_classes=[IsAuthenticated]
+        detail=False,
+        methods=['get'],
+        pagination_class=None,
+        permission_classes=[IsAuthenticated]
     )
     def me(self, request):
         serializer = UserListSerializer(
@@ -67,9 +67,9 @@ class UserViewSet(CreateModelMixin,
         )
 
     @action(
-            detail=False,
-            methods=['post'],
-            permission_classes=[IsAuthenticated]
+        detail=False,
+        methods=['post'],
+        permission_classes=[IsAuthenticated]
     )
     def set_password(self, request):
         serializer = SetPasswordSerializer(
@@ -85,9 +85,9 @@ class UserViewSet(CreateModelMixin,
         )
 
     @action(
-            detail=False, methods=['get'],
-            permission_classes=[IsAuthenticated],
-            pagination_class=CustomPaginator
+        detail=False, methods=['get'],
+        permission_classes=[IsAuthenticated],
+        pagination_class=CustomPaginator
     )
     def subscriptions(self, request):
         queryset = User.objects.filter(follower__user=request.user)
@@ -99,9 +99,9 @@ class UserViewSet(CreateModelMixin,
         return self.get_paginated_response(serializer.data)
 
     @action(
-            detail=True,
-            methods=['post', 'delete'],
-            permission_classes=[IsAuthenticated]
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated]
     )
     def subscribe(self, request, **kwargs):
         author = get_object_or_404(User, pk=kwargs['pk'])
@@ -186,25 +186,25 @@ class RecipeViewSet(ModelViewSet):
 
         if not Recipe.objects.filter(id=kwargs['pk']).exists():
             return Response(
-                    {'errors': 'Запрашиваемый рецепт отсутствует.'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                {'errors': 'Запрашиваемый рецепт отсутствует.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         try:
             request.data['ingredients']
             request.data['tags']
         except KeyError:
             return Response(
-                    {'errors': 'Рецепт не содержит "ingredients"/"tags".'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                {'errors': 'Рецепт не содержит "ingredients"/"tags".'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         return super().partial_update(request, *args, **kwargs)
 
     @action(
-            detail=True,
-            methods=['post', 'delete'],
-            permission_classes=[IsAuthorOrReadOnlyPermission]
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthorOrReadOnlyPermission]
     )
     def favorite(self, request, **kwargs):
         if not Recipe.objects.filter(id=kwargs['pk']).exists():
@@ -253,10 +253,10 @@ class RecipeViewSet(ModelViewSet):
             )
 
     @action(
-            detail=True,
-            methods=['post', 'delete'],
-            permission_classes=[IsAuthorOrReadOnlyPermission],
-            pagination_class=None
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthorOrReadOnlyPermission],
+        pagination_class=None
     )
     def shopping_cart(self, request, **kwargs):
 
@@ -307,9 +307,9 @@ class RecipeViewSet(ModelViewSet):
             )
 
     @action(
-            detail=False,
-            methods=['get'],
-            permission_classes=[IsAuthenticated]
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated]
     )
     def download_shopping_cart(self, request, **kwargs):
         ingredients = (
