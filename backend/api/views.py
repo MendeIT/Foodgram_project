@@ -118,10 +118,10 @@ class UserViewSet(CreateModelMixin,
                     {'errors': 'Нельзя подписаться на самого себя.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            print('до сериализатора')
-            serializer = FollowAuthorSerializer(author, data=request.data, context={'request': request})
-            print('после сериализатора')
 
+            serializer = FollowAuthorSerializer(
+                author, data=request.data, context={'request': request}
+            )
             serializer.is_valid(raise_exception=True)
             Follow.objects.create(user=request.user, author=author)
 
