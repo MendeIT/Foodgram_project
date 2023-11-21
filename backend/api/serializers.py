@@ -210,7 +210,7 @@ class FollowAuthorSerializer(serializers.ModelSerializer):
     email = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()
     is_subscribed = serializers.SerializerMethodField()
-    recipes = RecipeSerializer(many=True, read_only=True)
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -227,6 +227,7 @@ class FollowAuthorSerializer(serializers.ModelSerializer):
         ]
 
     def get_is_subscribed(self, data):
+        print('get_is_subscribed')
         user = self.context.get('request').user
 
         if user.is_anonymous or user == data:
@@ -237,10 +238,8 @@ class FollowAuthorSerializer(serializers.ModelSerializer):
     def get_recipes(self, data):
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
-
-        recipes = (
-            data.recipes.all()[:int(limit)] if limit else data.recipes.all()
-        )
+        recipes_all = data.recipes.all()
+        recipes = recipes_all[:int(limit)] if limit else recipes_all
         serializer = RecipeSerializer(
             recipes, many=True, read_only=True
         )
