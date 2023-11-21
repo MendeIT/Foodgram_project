@@ -90,7 +90,7 @@ class UserViewSet(CreateModelMixin,
         pagination_class=CustomPaginator
     )
     def subscriptions(self, request):
-        queryset = User.objects.filter(follower__user=request.user)
+        queryset = User.objects.filter(following__user=request.user)
         page = self.paginate_queryset(queryset)
         serializer = AuthorSerializer(
             page, many=True, context={'request': request}
@@ -139,7 +139,7 @@ class UserViewSet(CreateModelMixin,
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            author.delete()
+            author.following.filter(user=request.user).delete()
 
             return Response(
                 {'detail': 'Успешная отписка'},
@@ -215,6 +215,7 @@ class RecipeViewSet(ModelViewSet):
                 )},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
         recipe = Recipe.objects.get(id=kwargs['pk'])
 
         if request.method == 'POST':
@@ -245,7 +246,7 @@ class RecipeViewSet(ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            recipe.delete()
+            recipe.favorites.filter(user=request.user).delete()
 
             return Response(
                 {'detail': 'Рецепт успешно удален из избранного.'},
@@ -299,7 +300,7 @@ class RecipeViewSet(ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            recipe.delete()
+            recipe.shoppingcart.filter(user=request.user).delete()
 
             return Response(
                 {'detail': 'Рецепт удален из корзины.'},
