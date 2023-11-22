@@ -11,9 +11,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('DJANGO_KEY')
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = (os.getenv('ALLOWED_HOSTS', 'Test host')).split()
+CSRF_TRUSTED_ORIGINS = (os.getenv('ALLOWED_HOSTS', 'Test host')).split()
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -65,20 +66,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram_project.wsgi.application'
 
-# } if DEBUG else {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': os.getenv('POSTGRES_DB', 'django'),
-    #     'USER': os.getenv('POSTGRES_USER', 'django'),
-    #     'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-    #     'HOST': os.getenv('DB_HOST', ''),
-    #     'PORT': os.getenv('DB_PORT', 5432)
-    # }
+} if DEBUG else {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'django'),
+        'USER': os.getenv('POSTGRES_USER', 'django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', ''),
+        'PORT': os.getenv('DB_PORT', 5432)
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -117,6 +118,9 @@ MEDIA_ROOT = BASE_DIR / 'mediafiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
@@ -132,6 +136,10 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 6,
     'SEARCH_PARAM': 'name',
 }
+if DEBUG:
+    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'].append(
+        'rest_framework.renderers.BrowsableAPIRenderer'
+    )
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
@@ -144,8 +152,6 @@ DJOSER = {
 }
 
 FILE_NAME = 'ShoppingСart.txt'
-
-CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_URLS_REGEX = r'^/api/.*$'
 
