@@ -11,3 +11,7 @@ deploy:
 	sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate --noinput
 	sudo docker compose -f docker-compose.production.yml exec backend python manage.py loadingredientstags
 	sudo docker compose -f docker-compose.production.yml exec backend cp --recursive --update /app/collected_static/. /backend_static/static/
+
+cleanhost:
+	sudo docker container prune -f
+	sudo docker image prune -f
