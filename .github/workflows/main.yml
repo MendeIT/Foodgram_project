@@ -183,6 +183,7 @@ jobs:
         script: |
           cd foodgram
           make deploy
+          make cleanhost
 
   send_telegram_message:
     runs-on: ubuntu-latest
