@@ -120,9 +120,7 @@ class UserViewSet(CreateModelMixin,
                 )
 
             serializer = FollowAuthorSerializer(
-                author,
-                data=request.data,
-                context={'request': request}
+                author, data=request.data, context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
             Follow.objects.create(user=request.user, author=author)
@@ -207,18 +205,19 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=[IsAuthorOrReadOnlyPermission]
     )
     def favorite(self, request, **kwargs):
-        if not Recipe.objects.filter(id=kwargs['pk']).exists():
-            return Response(
-                {'errors': (
-                    'Нельзя добавить или удалить '
-                    'несуществующий рецепт в избранное.'
-                )},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        recipe = Recipe.objects.get(id=kwargs['pk'])
 
         if request.method == 'POST':
+
+            if not Recipe.objects.filter(id=kwargs['pk']).exists():
+                return Response(
+                    {'errors': (
+                        'Нельзя добавить '
+                        'несуществующий рецепт в избранное.'
+                    )},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            recipe = Recipe.objects.get(id=kwargs['pk'])
 
             if recipe.favorites.filter(user=request.user).exists():
                 return Response(
@@ -239,6 +238,7 @@ class RecipeViewSet(ModelViewSet):
             )
 
         if request.method == 'DELETE':
+            recipe = get_object_or_404(Recipe, id=kwargs['pk'])
 
             if not recipe.favorites.filter(user=request.user).exists():
                 return Response(
@@ -261,18 +261,18 @@ class RecipeViewSet(ModelViewSet):
     )
     def shopping_cart(self, request, **kwargs):
 
-        if not Recipe.objects.filter(id=kwargs['pk']).exists():
-            return Response(
-                {'errors': (
-                    'Нельзя добавить или удалить '
-                    'несуществующий рецепт в корзину.'
-                )},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        recipe = Recipe.objects.get(id=kwargs['pk'])
-
         if request.method == 'POST':
+
+            if not Recipe.objects.filter(id=kwargs['pk']).exists():
+                return Response(
+                    {'errors': (
+                        'Нельзя добавить '
+                        'несуществующий рецепт в корзину.'
+                    )},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            recipe = Recipe.objects.get(id=kwargs['pk'])
 
             if recipe.shoppingcart.filter(user=request.user).exists():
                 return Response(
@@ -293,6 +293,7 @@ class RecipeViewSet(ModelViewSet):
             )
 
         if request.method == 'DELETE':
+            recipe = get_object_or_404(Recipe, id=kwargs['pk'])
 
             if not recipe.shoppingcart.filter(user=request.user).exists():
                 return Response(
