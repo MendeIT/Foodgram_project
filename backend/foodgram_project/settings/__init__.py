@@ -15,7 +15,9 @@ DEBUG = False
 
 ALLOWED_HOSTS = (os.getenv('ALLOWED_HOSTS', 'Test host')).split()
 
-CSRF_TRUSTED_ORIGINS = (os.getenv('CSRF_TRUSTED_ORIGINS', 'Test host')).split()
+CSRF_TRUSTED_ORIGINS = (os.getenv(
+    'CSRF_TRUSTED_ORIGINS', 'http://Test.host'
+)).split()
 
 INSTALLED_APPS = [
     'django.contrib.admin',
