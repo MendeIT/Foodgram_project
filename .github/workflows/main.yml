@@ -55,13 +55,15 @@ jobs:
       - name: Install dependencies
         run: |
           export DJANGO_KEY="0-42!#@*6jqo)lv^+@-+&(-@kjke@xzk%)1!w)vz-1uwk71p)="
+          cd backend/
           python -m pip install --upgrade pip
-          pip install -r ./backend/requirements.txt
-      - name: Run server with Develop settings
+          pip install -r requirements.txt
+      - name: Migrate and load ingredinets & tags
         run: |
-          cd backend
           python manage.py migrate --settings "foodgram_project.settings.settings_develop"
           python manage.py loadingredientstags --settings "foodgram_project.settings.settings_develop"
+      - name: Run server with Develop settings
+        run: |
           python manage.py runserver --settings "foodgram_project.settings.settings_develop"
       - uses: actions/checkout@v3
       - name: Install Postman CLI
@@ -74,6 +76,10 @@ jobs:
           postman collection run "27683968-fc6a4e2d-2ef9-46e4-8a30-226c21c562f0"
       - name: Login to Postman CLI
         run: postman logout ${{ secrets.POSTMAN_API_KEY }}
+      - name: Delete data from DB
+        run: |
+          cd ../postman-collection/
+          bash clear_db.sh
       - name: Stop server
         run: |
           ^C
