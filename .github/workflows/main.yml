@@ -52,12 +52,18 @@ jobs:
     name: Automated API tests using Postman CLI
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+    
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+          with:
+            python-version: 3.9
       - name: Install dependencies
         run: |
-          export DJANGO_KEY="0-42!#@*6jqo)lv^+@-+&(-@kjke@xzk%)1!w)vz-1uwk71p)="
           cd backend/
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          export DJANGO_KEY="0-42!#@*6jqo)lv^+@-+&(-@kjke@xzk%)1!w)vz-1uwk71p)="
       - name: Migrate and load ingredinets & tags
         run: |
           python manage.py migrate --settings "foodgram_project.settings.settings_develop"
@@ -74,7 +80,7 @@ jobs:
       - name: Run API tests
         run: |
           postman collection run "27683968-fc6a4e2d-2ef9-46e4-8a30-226c21c562f0"
-      - name: Login to Postman CLI
+      - name: Logout to Postman CLI
         run: postman logout ${{ secrets.POSTMAN_API_KEY }}
       - name: Delete data from DB
         run: |
@@ -87,7 +93,9 @@ jobs:
   backend_build_and_push_to_docker_hub:
     name: Push Docker backend image to DockerHub
     runs-on: ubuntu-latest
-    needs: [tests, automated-api-tests]
+    needs: 
+      - tests
+      - automated-api-tests
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
