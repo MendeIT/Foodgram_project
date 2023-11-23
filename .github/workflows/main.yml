@@ -69,11 +69,6 @@ jobs:
           cd backend/
           python manage.py migrate --settings "foodgram_project.settings.settings_develop"
           python manage.py loadingredientstags --settings "foodgram_project.settings.settings_develop"
-      - name: Run server with Develop settings
-        run: |
-          cd backend/
-          python manage.py runserver --settings "foodgram_project.settings.settings_develop"
-      - uses: actions/checkout@v3
       - name: Install Postman CLI
         run: |
           curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
