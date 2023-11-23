@@ -56,7 +56,7 @@ jobs:
           export DJANGO_KEY="0-42!#@*6jqo)lv^+@-+&(-@kjke@xzk%)1!w)vz-1uwk71p)="
           python -m pip install --upgrade pip
           pip install -r ./backend/requirements.txt
-      -name: Run server with Develop settings
+      - name: Run server with Develop settings
         run: |
           cd backend
           python manage.py migrate --settings "foodgram_project.settings.settings_develop"
@@ -73,7 +73,7 @@ jobs:
           postman collection run "27683968-fc6a4e2d-2ef9-46e4-8a30-226c21c562f0"
       - name: Login to Postman CLI
         run: postman logout ${{ secrets.POSTMAN_API_KEY }}
-      -name: Stop server
+      - name: Stop server
         run: |
           ^C
 
