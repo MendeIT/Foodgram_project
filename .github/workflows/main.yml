@@ -128,7 +128,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd frontend/
-          npm ci
+          npm install
 
       - name: Test frontend
         run: |
@@ -138,7 +138,8 @@ jobs:
   frontend_build_and_push_to_docker_hub:
     name: Push Docker frontend image to DockerHub
     runs-on: ubuntu-latest
-    needs: frontend_tests
+    needs:
+      - frontend_tests
     steps:
       - uses: actions/checkout@v4
 
