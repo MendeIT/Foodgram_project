@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -317,13 +318,15 @@ class RecipeViewSet(ModelViewSet):
         ingredients = (
             RecipeIngredient.objects.filter(
                 recipe__shoppingcart__user=request.user
-            ).values('ingredient').values_list(
+            ).values('ingredient').annotate(
+                total_amount=Sum('amount')
+            ).values_list(
                 'ingredient__name',
-                'amount',
+                'total_amount',
                 'ingredient__measurement_unit'
             )
         )
-        lst_ingredients = [f'{i[0]} - {i[1]} {i[2]}.' for i in ingredients]
+        lst_ingredients = [f'{i[0]} --- {i[1]} {i[2]}.' for i in ingredients]
         file = HttpResponse(
             'Cписок покупок:\n' + '\n'.join(lst_ingredients),
             content_type='text/plain', charset='utf-8'
