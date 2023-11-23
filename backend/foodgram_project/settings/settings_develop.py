@@ -4,6 +4,8 @@ from foodgram_project.settings import *
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ALLOWED_HOSTS = ['*']
+
 DEBUG = True
 
 DATABASES = {
