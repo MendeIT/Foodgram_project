@@ -77,7 +77,7 @@ jobs:
       - name: Run API tests
         run: |
           cd backend/
-          python manage.py migrate --settings "foodgram_project.settings.settings_develop" & postman collection run "27683968-fc6a4e2d-2ef9-46e4-8a30-226c21c562f0"
+          python manage.py runserver --settings "foodgram_project.settings.settings_develop" & postman collection run "27683968-fc6a4e2d-2ef9-46e4-8a30-226c21c562f0"
       - name: Logout to Postman CLI
         run: postman logout ${{ secrets.POSTMAN_API_KEY }}
       - name: Delete data from DB
