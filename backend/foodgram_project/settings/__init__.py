@@ -14,7 +14,8 @@ SECRET_KEY = os.getenv('DJANGO_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = (os.getenv('ALLOWED_HOSTS', 'Test host')).split()
-CSRF_TRUSTED_ORIGINS = (os.getenv('ALLOWED_HOSTS', 'Test host')).split()
+
+CSRF_TRUSTED_ORIGINS = (os.getenv('CSRF_TRUSTED_ORIGINS', 'Test host')).split()
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -68,11 +69,6 @@ WSGI_APPLICATION = 'foodgram_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-} if DEBUG else {
-    'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('POSTGRES_DB', 'django'),
         'USER': os.getenv('POSTGRES_USER', 'django'),
@@ -101,7 +97,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'ru'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'Europe/Moscow'
 
@@ -136,10 +132,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 6,
     'SEARCH_PARAM': 'name',
 }
-if DEBUG:
-    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'].append(
-        'rest_framework.renderers.BrowsableAPIRenderer'
-    )
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
@@ -155,16 +147,12 @@ FILE_NAME = 'ShoppingСart.txt'
 
 CORS_URLS_REGEX = r'^/api/.*$'
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000'
-]
+CORS_ORIGIN_WHITELIST = ['http://localhost:3000']
 
 sentry_sdk.init(
     dsn=('https://cf824c317dfa948ab6e82843a6b8304f@o4505985247150080.'
          + 'ingest.sentry.io/4506231236198400'),
-    integrations=[
-        DjangoIntegration(),
-    ],
+    integrations=[DjangoIntegration(),],
     traces_sample_rate=1.0,
     send_default_pii=True
 )
