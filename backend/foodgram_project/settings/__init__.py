@@ -16,7 +16,7 @@ DEBUG = False
 ALLOWED_HOSTS = (os.getenv('ALLOWED_HOSTS', 'Test host')).split()
 
 CSRF_TRUSTED_ORIGINS = (os.getenv(
-    'CSRF_TRUSTED_ORIGINS', 'http://Test.host'
+    'CSRF_TRUSTED_ORIGINS', 'http://your_domain_name.django'
 )).split()
 
 INSTALLED_APPS = [
@@ -72,11 +72,11 @@ WSGI_APPLICATION = 'foodgram_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'django'),
-        'USER': os.getenv('POSTGRES_USER', 'django'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', ''),
-        'PORT': os.getenv('DB_PORT', 5432)
+        'NAME': os.getenv('DB_NAME', 'default'),
+        'USER': os.getenv('DB_USER', 'default'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'default'),
+        'HOST': os.getenv('DB_HOST', 'default'),
+        'PORT': os.getenv('DB_PORT', '5432')
     }
 }
 

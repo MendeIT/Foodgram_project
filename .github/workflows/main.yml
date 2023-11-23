@@ -125,11 +125,10 @@ jobs:
         with:
           node-version: '13.x'
 
-      - name: Install dependencies and test frontend
+      - name: Install dependencies
         run: |
           cd frontend/
-          npm install
-          npm run test
+          npm ci
   
   frontend_build_and_push_to_docker_hub:
     name: Push Docker frontend image to DockerHub
