@@ -154,7 +154,7 @@ CORS_ORIGIN_WHITELIST = ['http://localhost:3000']
 sentry_sdk.init(
     dsn=('https://cf824c317dfa948ab6e82843a6b8304f@o4505985247150080.'
          + 'ingest.sentry.io/4506231236198400'),
-    integrations=[DjangoIntegration(),],
+    integrations=[DjangoIntegration(), ],
     traces_sample_rate=1.0,
     send_default_pii=True
 )

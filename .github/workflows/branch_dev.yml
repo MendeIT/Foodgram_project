@@ -1,0 +1,104 @@
+name: Foodgram Develop workflow
+
+on:
+
+  push:
+    branches:
+      - dev
+
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+
+  test_flake8:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13.10
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          cd backend/
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Test with flake8
+        env:
+          POSTGRES_USER: django_user
+          POSTGRES_PASSWORD: django_password
+          POSTGRES_DB: django_db
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+        run: |
+          export DJANGO_KEY="0-42!#@*6jqo)lv^+@-+&(-@kjke@xzk%)1!w)vz-1uwk71p)="
+          python -m flake8 backend/
+  
+  automated-api-tests:
+    name: Automated API tests using Postman CLI
+    runs-on: ubuntu-latest
+    needs: 
+      - test_flake8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          cd backend/
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Migrate and load ingredinets & tags
+        run: |
+          cd backend/
+          python manage.py migrate --settings "foodgram_project.settings.settings_develop"
+          python manage.py loadingredientstags --settings "foodgram_project.settings.settings_develop"
+
+      - name: Install Postman CLI
+        run: |
+          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+
+      - name: Login to Postman CLI
+        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+
+      - name: Run API tests
+        run: |
+          cd backend/
+          export DJANGO_KEY="0-42!#@*6jqo)lv^+@-+&(-@kjke@xzk%)1!w)vz-1uwk71p)="
+          python manage.py runserver --settings "foodgram_project.settings.settings_develop" & postman collection run "27683968-fc6a4e2d-2ef9-46e4-8a30-226c21c562f0"
+
+      - name: Logout to Postman CLI
+        run: postman logout ${{ secrets.POSTMAN_API_KEY }}
+
+  send_telegram_message:
+    runs-on: ubuntu-latest
+    name: Send message to telegram
+    needs: 
+      - automated-api-tests
+    steps:
+      - name: Send message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: BRANCH:[${{github.ref_name}}] ${{ github.actor }} запушил в ${{ github.repository }}!
