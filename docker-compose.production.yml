@@ -39,8 +39,7 @@ services:
       - media:/var/html/media/
       - ../frontend/build:/usr/share/nginx/html/
       - ./gateway/nginx.conf:/etc/nginx/conf.d/
-      - ./docs/openapi-schema.yml:/var/html/redoc/redoc.yml
-      - ./docs/redoc.html:/var/html/redoc/redoc.html
+      - ../docs/:/usr/share/nginx/html/redoc/
     depends_on:
       - frontend
       - backend
