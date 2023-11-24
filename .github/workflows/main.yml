@@ -1,11 +1,10 @@
-name: Main Foodgram workflow
+name: Foodgram Production workflow
 
 on:
 
   push:
     branches:
       - master
-      - dev
 
   pull_request:
     branches:
@@ -206,4 +205,4 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Деплой ${{github.repository}} успешно выполнен!
+          message: BRANCH:[${{github.ref_name}}] Автор[${{ github.actor }}] Деплой ${{github.repository}} успешно выполнен!
