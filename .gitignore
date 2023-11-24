@@ -133,3 +133,5 @@ dmypy.json
 
 mediafiles/
 .gitignore
+
+node_modules/

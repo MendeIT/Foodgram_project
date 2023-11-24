@@ -13,8 +13,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         self.stdout.write(self.style.SUCCESS('######## START LOAD ########'))
-        csv_ingredients = os.path.join(BASE_DIR, 'data/ingredients.csv')
-        csv_tags = os.path.join(BASE_DIR, 'data/tags.csv')
+        csv_ingredients = os.path.join(BASE_DIR, 'data', 'ingredients.csv')
+        csv_tags = os.path.join(BASE_DIR, 'data', 'tags.csv')
         try:
             with open(file=csv_ingredients, mode='r', encoding='utf-8') as f:
                 rows = csv.reader(f)

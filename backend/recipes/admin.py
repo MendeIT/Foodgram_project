@@ -12,9 +12,9 @@ from users.models import Follow, User
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ('id', 'username', 'first_name', 'last_name',
-                    'email', 'password', 'date_joined')
+                    'email', 'password', 'date_joined', 'last_login')
     search_fields = ('username', 'first_name', 'last_name', 'email')
-    list_editable = ('password',)
+    list_editable = ('password', 'first_name', 'last_name')
     list_filter = ('id',)
 
 

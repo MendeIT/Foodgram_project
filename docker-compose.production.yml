@@ -39,7 +39,7 @@ services:
       - media:/var/html/media/
       - ../frontend/build:/usr/share/nginx/html/
       - ./gateway/nginx.conf:/etc/nginx/conf.d/
-      - ./docs/:/usr/share/nginx/html/api/docs/
+      - ../docs/:/var/html/redoc/
     depends_on:
       - frontend
       - backend

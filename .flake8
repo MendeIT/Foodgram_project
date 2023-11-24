@@ -13,5 +13,6 @@ exclude =
     */venv/,
     env/
     */env/,
+    */settings/
 per-file-ignores =
-    */manage.py:E501
+    backend/foodgram_project\settings\settings_develop.py:E403
