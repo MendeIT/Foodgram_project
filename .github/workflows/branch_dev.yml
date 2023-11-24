@@ -93,7 +93,8 @@ jobs:
   send_telegram_message:
     runs-on: ubuntu-latest
     name: Send message to telegram
-    needs: deploy
+    needs: 
+      - automated-api-tests
     steps:
       - name: Send message
         uses: appleboy/telegram-action@master
