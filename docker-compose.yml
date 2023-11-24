@@ -8,7 +8,7 @@ volumes:
 services:
   db:
     image: postgres:13.10
-    container_name: db
+    container_name: foodgram_db
     env_file: 
       - .env
     volumes:
@@ -19,7 +19,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: mendeit/foodgram_backend
-    container_name: backend
+    container_name: foodgram_backend
     env_file: 
       - .env
     volumes:
@@ -33,7 +33,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     image: mendeit/foodgram_frontend
-    container_name: frontend
+    container_name: foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
 
@@ -42,7 +42,7 @@ services:
       context: ./gateway
       dockerfile: Dockerfile
     image: mendeit/foodgram_gateway
-    container_name: gateway
+    container_name: foodgram_gateway
     volumes:
       - static:/var/html/static/
       - media:/var/html/media/
