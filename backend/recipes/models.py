@@ -19,9 +19,6 @@ class Ingredient(models.Model):
         verbose_name='Еденица измерения'
     )
 
-    def __str__(self):
-        return f'{self.name}, {self.measurement_unit}'
-
     class Meta:
         ordering = ['name']
         verbose_name = 'Ингредиент'
@@ -32,6 +29,9 @@ class Ingredient(models.Model):
                 name='unique_name_measurement_unit'
             )
         ]
+
+    def __str__(self):
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Tag(models.Model):
