@@ -72,11 +72,11 @@ WSGI_APPLICATION = 'foodgram_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'default'),
-        'USER': os.getenv('DB_USER', 'default'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'default'),
-        'HOST': os.getenv('DB_HOST', 'default'),
-        'PORT': os.getenv('DB_PORT', '5432')
+        'NAME': os.getenv('POSTGRES_DB', 'mydb'),
+        'USER': os.getenv('POSTGRES_USER', 'myuser'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'mypass'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', 5432),
     }
 }
 

@@ -71,8 +71,8 @@ jobs:
       - name: Migrate and load ingredinets & tags
         run: |
           cd backend/
-          python manage.py migrate --settings "foodgram_project.settings.settings_develop"
-          python manage.py loadingredientstags --settings "foodgram_project.settings.settings_develop"
+          python manage.py migrate --settings "foodgram_project.settings.develop"
+          python manage.py loadingredientstags --settings "foodgram_project.settings.develop"
 
       - name: Install Postman CLI
         run: |
@@ -85,7 +85,7 @@ jobs:
         run: |
           cd backend/
           export DJANGO_KEY="0-42!#@*6jqo)lv^+@-+&(-@kjke@xzk%)1!w)vz-1uwk71p)="
-          python manage.py runserver --settings "foodgram_project.settings.settings_develop" & postman collection run "27683968-fc6a4e2d-2ef9-46e4-8a30-226c21c562f0"
+          python manage.py runserver --settings "foodgram_project.settings.develop" & postman collection run "27683968-fc6a4e2d-2ef9-46e4-8a30-226c21c562f0"
 
       - name: Logout to Postman CLI
         run: postman logout ${{ secrets.POSTMAN_API_KEY }}
@@ -101,4 +101,4 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: BRANCH:[${{github.ref_name}}] ${{ github.actor }} запушил в ${{ github.repository }}!
+          message: <<${{ github.ref_name }}>> Автор <<${{ github.actor }}>> запушил в <<${{ github.repository }}>>. CI пройден успешно!
