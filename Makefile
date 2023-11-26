@@ -10,8 +10,10 @@ deploy:
 	sudo docker compose -f docker-compose.production.yml up -d
 	sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate --noinput
 	sudo docker compose -f docker-compose.production.yml exec backend python manage.py loadingredientstags
+	sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic --noinput
 	sudo docker compose -f docker-compose.production.yml exec backend cp --recursive --update /app/foodgram_project/collected_static/. /backend_static/static/
 
 cleanhost:
 	sudo docker container prune -f
 	sudo docker image prune -f
+	sudo docker network prune -f
