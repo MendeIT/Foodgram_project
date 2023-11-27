@@ -135,3 +135,4 @@ mediafiles/
 .gitignore
 
 node_modules/
+docker-compose.production.yml
