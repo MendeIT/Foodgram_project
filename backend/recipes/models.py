@@ -7,9 +7,8 @@ from users.models import User
 
 
 class Ingredient(models.Model):
-    """
-    Модель ингредиетов.
-    """
+    """Модель ингредиетов."""
+
     name = models.CharField(
         max_length=200,
         verbose_name='Название ингредиента'
@@ -26,7 +25,12 @@ class Ingredient(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=('name', 'measurement_unit'),
-                name='unique_name_measurement_unit'
+                name='unique_name_measurement_unit',
+                violation_error_message=(
+                    'Ингредиент уже имеется в БД, если вы хотите '
+                    'изменить еденицу измерения, необходимо '
+                    'внести корректировки в файл CSV.'
+                )
             )
         ]
 
@@ -35,9 +39,8 @@ class Ingredient(models.Model):
 
 
 class Tag(models.Model):
-    """
-    Модель тегов.
-    """
+    """Модель тегов."""
+
     name = models.CharField(
         max_length=200,
         verbose_name='Имя тега'
@@ -47,18 +50,18 @@ class Tag(models.Model):
         verbose_name='Цвет тега',
         validators=[
             RegexValidator(regex=r'^\#([a-fA-F0-9]{6})$',
-                           message='Цвет не соответствует формату HEX')
+                           message='Цвет не соответствует формату HEX.')
         ]
     )
     slug = models.SlugField(
         max_length=200,
         unique=True,
         db_index=True,
-        verbose_name='Слаг тега'
+        verbose_name='Слаг тега',
+        error_messages={
+            'unique': 'Вводимый slug уже имеется.',
+        }
     )
-
-    def __str__(self):
-        return self.name
 
     class Meta:
         verbose_name = 'Тег'
@@ -66,15 +69,21 @@ class Tag(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=('name', 'color', 'slug'),
-                name='unique_name_color_slug'
+                name='unique_name_color_slug',
+                violation_error_message=(
+                    'Тег с выбранным цветом slug уже существует, '
+                    'введите другой тег с другим цветом и другим slug.'
+                )
             )
         ]
 
+    def __str__(self):
+        return self.name
+
 
 class Recipe(models.Model):
-    """
-    Модель рецептов.
-    """
+    """Модель рецептов."""
+
     tags = models.ManyToManyField(
         to=Tag,
         verbose_name='Список тегов',
@@ -124,34 +133,36 @@ class Recipe(models.Model):
         verbose_name='Дата публикации'
     )
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         constraints = [
             models.UniqueConstraint(
                 fields=('name', 'author'),
-                name='unique_name_author'
+                name='unique_name_author',
+                violation_error_message=(
+                    'Вы уже создавали рецепт с таким названием'
+                )
             )
         ]
 
+    def __str__(self):
+        return self.name
+
 
 class RecipeIngredient(models.Model):
-    """
-    Связующая таблица между Recipe и Ingridient.
-    """
+    """Связующая таблица между Recipe и Ingridient."""
+
     recipe = models.ForeignKey(
         to=Recipe,
         on_delete=models.CASCADE,
-        related_name='recipe_ingridient',
+        related_name='ingredient',
         verbose_name='Рецепт'
     )
     ingredient = models.ForeignKey(
         to=Ingredient,
         on_delete=models.CASCADE,
-        related_name='ingridient_recipe',
+        related_name='recipe',
         verbose_name='Ингредиент'
     )
     amount = models.PositiveSmallIntegerField(
@@ -164,18 +175,17 @@ class RecipeIngredient(models.Model):
         ]
     )
 
-    def __str__(self):
-        return f'{self.recipe} {self.ingredient} {self.amount}'
-
     class Meta:
         verbose_name = 'Ингредиенты в рецепте'
         verbose_name_plural = 'Ингредиенты в рецепте'
 
+    def __str__(self):
+        return f'{self.recipe} {self.ingredient} {self.amount}'
+
 
 class Favorites(models.Model):
-    """
-    Модель Избранного для авторизованного пользователя.
-    """
+    """Модель Избранного для авторизованного пользователя."""
+
     user = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,
@@ -193,24 +203,24 @@ class Favorites(models.Model):
         verbose_name='Дата добавления в избранное'
     )
 
-    def __str__(self):
-        return f'{self.user} {self.recipe}'
-
     class Meta:
         verbose_name = 'Избранное пользователя'
         verbose_name_plural = 'Избранное пользователя'
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'user'],
-                name='unique_favorites_recipe_user'
+                name='unique_favorites_recipe_user',
+                violation_error_message='Рецепт уже в Избранном'
             )
         ]
 
+    def __str__(self):
+        return f'{self.user} {self.recipe}'
+
 
 class ShoppingCart(models.Model):
-    """
-    Модель корзины для авторизованного пользователя.
-    """
+    """Модель корзины для авторизованного пользователя."""
+
     user = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,
@@ -228,15 +238,16 @@ class ShoppingCart(models.Model):
         verbose_name='Дата добавления в корзину'
     )
 
-    def __str__(self):
-        return f'{self.user} {self.recipe}'
-
     class Meta:
         verbose_name = 'Корзина пользователя'
         verbose_name_plural = 'Корзина пользователя'
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'user'],
-                name='unique_shoppingcard_recipe_user'
+                name='unique_shoppingcard_recipe_user',
+                violation_error_message='Рецепт уже в Корзине'
             )
         ]
+
+    def __str__(self):
+        return f'{self.user} {self.recipe}'
