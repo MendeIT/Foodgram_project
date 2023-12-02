@@ -9,9 +9,6 @@ DATABASES = {
 
 INTERNAL_IPS = ['127.0.0.1']
 
-settings.INSTALLED_APPS.append('debug_toolbar')
-
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
