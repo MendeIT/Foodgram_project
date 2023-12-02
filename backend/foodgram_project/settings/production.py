@@ -1,6 +1,7 @@
 import os
 
 import sentry_sdk
+from django.conf import settings
 from dotenv import load_dotenv
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -21,25 +22,9 @@ DATABASES = {
     }
 }
 
-REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-    ],
-    'DEFAULT_PAGINATION_CLASS': [
-        'api.pagination.CustomPaginator',
-    ],
-    'PAGE_SIZE': 6,
-    'SEARCH_PARAM': 'name',
-}
+settings.REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = [
+    'rest_framework.renderers.JSONRenderer',
+]
 
 sentry_sdk.init(
     dsn=('https://cf824c317dfa948ab6e82843a6b8304f@o4505985247150080.'

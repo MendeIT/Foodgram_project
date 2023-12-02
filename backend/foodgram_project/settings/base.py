@@ -24,10 +24,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'django_filters',
+    'django_extensions',
     'corsheaders',
     'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
-    'users.apps.UsersConfig'
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -39,6 +40,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -135,34 +137,3 @@ FILE_NAME = 'ShoppingСart.txt'
 CORS_URLS_REGEX = r'^/api/.*$'
 
 CORS_ORIGIN_WHITELIST = ['http://localhost:3000']
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "custom": {
-            "format": (
-                "{asctime} - {levelname} - {module} "
-                "- {funcName} - {lineno} - {message}"
-            ),
-            "style": "{",
-        },
-        "simple": {
-            "format": "{levelname} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "custom"
-        },
-    },
-    "loggers": {
-        "foodgram": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-    },
-}

@@ -6,52 +6,23 @@ from recipes.models import (Favorites,
                             RecipeIngredient,
                             ShoppingCart,
                             Tag)
-from users.models import Follow, User
-
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'first_name', 'last_name',
-                    'email', 'password', 'date_joined', 'last_login')
-    search_fields = ('username', 'first_name', 'last_name', 'email')
-    list_editable = ('password', 'first_name', 'last_name')
-    list_filter = ('id',)
-
-
-@admin.register(Follow)
-class FollowAdmin(admin.ModelAdmin):
-    list_display = ('author', 'user')
-    search_fields = ('author', 'user')
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'measurement_unit')
-    search_fields = ('name',)
-    list_editable = ('measurement_unit',)
-    empty_value_display = '-пусто-'
-    ordering = ('name',)
-
-
-class IngredientInline(admin.TabularInline):
-    model = Recipe.ingredients.through
-
-
-@admin.register(Recipe)
-class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'text', 'pub_date', 'author')
-    search_fields = ('name', 'author')
-    list_filter = ('pub_date',)
-    empty_value_display = '-пусто-'
-    inlines = (IngredientInline,)
+    list_display_links = ['name']
+    list_editable = ['measurement_unit']
+    search_fields = ['name']
+    ordering = ['name']
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'color', 'slug')
     list_editable = ('name', 'color', 'slug')
+    ordering = ['name']
     prepopulated_fields = {'slug': ('name',)}
-    ordering = ('name',)
 
 
 @admin.register(RecipeIngredient)
@@ -64,13 +35,39 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     search_fields = ('user', 'recipe')
-    list_filter = ('user',)
-    ordering = ('user',)
+    list_filter = ['user']
+    ordering = ['user']
 
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     search_fields = ('user', 'recipe')
-    list_filter = ('user',)
-    ordering = ('user',)
+    list_filter = ['user']
+    ordering = ['user']
+
+
+class IngredientInline(admin.TabularInline):
+    model = Recipe.ingredients.through
+
+
+@admin.register(Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'text', 'pub_date', 'author')
+    list_display_links = ['name']
+    list_filter = ['pub_date']
+    search_fields = ('name', 'author')
+    date_hierarchy = 'pub_date'
+    inlines = [IngredientInline]
+    filter_horizontal = ['ingredients']
+    list_per_page = 10
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+
+        if request.user.is_superuser:
+            return qs.select_related(
+                'author').prefetch_related(
+                'tags').prefetch_related("ingredients")
+
+        return qs.filter(author=request.user)

@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
@@ -34,6 +36,8 @@ from recipes.models import (Ingredient,
                             ShoppingCart,
                             Tag)
 from users.models import Follow, User
+
+logger = logging.getLogger(__name__)
 
 
 class UserViewSet(CreateModelMixin,
@@ -105,9 +109,11 @@ class UserViewSet(CreateModelMixin,
         permission_classes=[IsAuthenticated]
     )
     def subscribe(self, request, **kwargs):
+        logger.info('subscribe')
         author = get_object_or_404(User, pk=kwargs['pk'])
-
+        logger.info('subscribe = author')
         if request.method == 'POST':
+            logger.info('POST')
             if author.following.filter(user=request.user).exists():
                 return Response(
                     {'errors': 'Вы уже подписаны на данного автора.'},
@@ -115,17 +121,20 @@ class UserViewSet(CreateModelMixin,
                 )
 
             if request.user == author:
+                logger.info('user == author')
                 return Response(
                     {'errors': 'Нельзя подписаться на самого себя.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
+            logger.info('before FollowAuthorSerializer')
             serializer = FollowAuthorSerializer(
                 author, data=request.data, context={'request': request}
             )
+            logger.info('after FollowAuthorSerializer')
             serializer.is_valid(raise_exception=True)
+            logger.info('FollowAuthorSerializer is Valid, before MODELS')
             Follow.objects.create(user=request.user, author=author)
-
+            logger.info('MODEL FOLLOW CREATED')
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
@@ -175,14 +184,17 @@ class RecipeViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'create']
 
     def get_serializer_class(self):
+        logger.info('get_serializer_class')
 
         if self.action in ('list', 'retrieve'):
+            logger.info('RecipeListSerializer')
             return RecipeListSerializer
 
+        logger.info('RecipeCreateSerializer')
         return RecipeCreateSerializer
 
     def partial_update(self, request, *args, **kwargs):
-
+        logger.info('RecipeViewSet///partial_update')
         if not Recipe.objects.filter(id=kwargs['pk']).exists():
             return Response(
                 {'errors': 'Запрашиваемый рецепт отсутствует.'},
