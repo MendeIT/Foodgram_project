@@ -25,7 +25,6 @@ INSTALLED_APPS = [
     'djoser',
     'django_filters',
     'django_extensions',
-    'debug_toolbar',
     'corsheaders',
     'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
