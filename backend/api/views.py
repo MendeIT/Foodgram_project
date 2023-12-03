@@ -1,6 +1,5 @@
-import logging
-
-from django.db.models import Sum
+from django.conf import settings
+from django.db.models import Sum, Count
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -28,7 +27,6 @@ from api.serializers import (AuthorSerializer,
                              TagSerializer,
                              UserListSerializer,
                              UserCreateSerializer)
-from foodgram_project.settings import FILE_NAME
 from recipes.models import (Ingredient,
                             Favorites,
                             Recipe,
@@ -37,7 +35,7 @@ from recipes.models import (Ingredient,
                             Tag)
 from users.models import Follow, User
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 
 class UserViewSet(CreateModelMixin,
@@ -95,8 +93,12 @@ class UserViewSet(CreateModelMixin,
         pagination_class=CustomPaginator
     )
     def subscriptions(self, request):
-        queryset = User.objects.filter(following__user=request.user)
+        queryset = User.objects.filter(
+            following__user=request.user
+        ).annotate(recipes_count=Count('recipes'))
+
         page = self.paginate_queryset(queryset)
+
         serializer = AuthorSerializer(
             page, many=True, context={'request': request}
         )
@@ -109,11 +111,10 @@ class UserViewSet(CreateModelMixin,
         permission_classes=[IsAuthenticated]
     )
     def subscribe(self, request, **kwargs):
-        logger.info('subscribe')
         author = get_object_or_404(User, pk=kwargs['pk'])
-        logger.info('subscribe = author')
+
         if request.method == 'POST':
-            logger.info('POST')
+
             if author.following.filter(user=request.user).exists():
                 return Response(
                     {'errors': 'Вы уже подписаны на данного автора.'},
@@ -121,20 +122,18 @@ class UserViewSet(CreateModelMixin,
                 )
 
             if request.user == author:
-                logger.info('user == author')
                 return Response(
                     {'errors': 'Нельзя подписаться на самого себя.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            logger.info('before FollowAuthorSerializer')
+
             serializer = FollowAuthorSerializer(
                 author, data=request.data, context={'request': request}
             )
-            logger.info('after FollowAuthorSerializer')
             serializer.is_valid(raise_exception=True)
-            logger.info('FollowAuthorSerializer is Valid, before MODELS')
+
             Follow.objects.create(user=request.user, author=author)
-            logger.info('MODEL FOLLOW CREATED')
+
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
@@ -176,7 +175,10 @@ class TagViewSet(ListModelMixin,
 
 
 class RecipeViewSet(ModelViewSet):
-    queryset = Recipe.objects.all()
+    """Модель представления рецептов."""
+
+    queryset = Recipe.objects.select_related(
+        'author').prefetch_related('tags', 'ingredients')
     permission_classes = [IsAuthorOrReadOnlyPermission]
     pagination_class = CustomPaginator
     filter_backends = [DjangoFilterBackend, SearchFilter]
@@ -184,17 +186,14 @@ class RecipeViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'create']
 
     def get_serializer_class(self):
-        logger.info('get_serializer_class')
 
         if self.action in ('list', 'retrieve'):
-            logger.info('RecipeListSerializer')
             return RecipeListSerializer
 
-        logger.info('RecipeCreateSerializer')
         return RecipeCreateSerializer
 
     def partial_update(self, request, *args, **kwargs):
-        logger.info('RecipeViewSet///partial_update')
+
         if not Recipe.objects.filter(id=kwargs['pk']).exists():
             return Response(
                 {'errors': 'Запрашиваемый рецепт отсутствует.'},
@@ -292,13 +291,14 @@ class RecipeViewSet(ModelViewSet):
                     {'errors': 'Рецепт уже есть в списке продуктов.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
             serializer = RecipeSerializer(
                 recipe,
                 data=request.data,
                 context={"request": request}
             )
-
             serializer.is_valid(raise_exception=True)
+
             ShoppingCart.objects.create(user=request.user, recipe=recipe)
 
             return Response(
@@ -338,11 +338,16 @@ class RecipeViewSet(ModelViewSet):
                 'ingredient__measurement_unit'
             )
         )
-        lst_ingredients = [f'{i[0]} --- {i[1]} {i[2]}.' for i in ingredients]
+        lst_ingredients = [
+            f'{ingredient[0]} --- {ingredient[1]} {ingredient[2]}.'
+            for ingredient in ingredients
+        ]
         file = HttpResponse(
             'Cписок покупок:\n' + '\n'.join(lst_ingredients),
             content_type='text/plain', charset='utf-8'
         )
-        file['Content-Disposition'] = (f'attachment; filename={FILE_NAME}')
+        file['Content-Disposition'] = (
+            f'attachment; filename={settings.FILE_NAME}'
+        )
 
         return file
