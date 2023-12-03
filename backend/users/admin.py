@@ -24,7 +24,7 @@ class FollowAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        print(qs)
+
         if request.user.is_superuser:
             return qs.select_related(
                 'author')
