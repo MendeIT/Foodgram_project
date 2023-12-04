@@ -35,8 +35,6 @@ from recipes.models import (Ingredient,
                             Tag)
 from users.models import Follow, User
 
-# logger = logging.getLogger(__name__)
-
 
 class UserViewSet(CreateModelMixin,
                   ListModelMixin,
@@ -191,25 +189,6 @@ class RecipeViewSet(ModelViewSet):
             return RecipeListSerializer
 
         return RecipeCreateSerializer
-
-    def partial_update(self, request, *args, **kwargs):
-
-        if not Recipe.objects.filter(id=kwargs['pk']).exists():
-            return Response(
-                {'errors': 'Запрашиваемый рецепт отсутствует.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        try:
-            request.data['ingredients']
-            request.data['tags']
-        except KeyError:
-            return Response(
-                {'errors': 'Рецепт не содержит "ingredients"/"tags".'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        return super().partial_update(request, *args, **kwargs)
 
     @action(
         detail=True,

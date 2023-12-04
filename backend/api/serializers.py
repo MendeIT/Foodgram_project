@@ -2,13 +2,11 @@ from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import Ingredient, Tag, Recipe, RecipeIngredient
 from users.models import User
-
-# logger = logging.getLogger(__name__)
 
 
 class UserListSerializer(UserSerializer):
@@ -71,19 +69,12 @@ class UserCreateSerializer(UserCreateSerializer):
 
         return email
 
-    # def validate_password(self, password):
-    #     try:
-    #         validate_password(password)
-    #     except exceptions.ValidationError as error:
-    #         raise serializers.ValidationError(
-    #             {'password': list(error.messages)}
-    #         )
-
     def validate(self, data):
-        for field in data:
-            if field == '':
+        fields = ['email', 'username', 'first_name', 'last_name', 'password']
+        for field in fields:
+            if field not in data:
                 raise serializers.ValidationError(
-                    {f'{field}': 'Поле обязательно к заполнению.'}
+                    {f'{field}': f'{field} обязательно к заполнению.'}
                 )
 
         if data['username'] == data['password']:
@@ -96,7 +87,7 @@ class UserCreateSerializer(UserCreateSerializer):
                 {'last_name': 'Имя и Фамилия не должны совпадать.'}
             )
 
-        return data
+        return super().validate(data)
 
 
 class SetPasswordSerializer(serializers.Serializer):
@@ -363,41 +354,45 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         }
 
     def validate_ingredients(self, ingredients):
-
         if not ingredients:
             raise serializers.ValidationError(
-                {'ingredients': 'Укажите ингредиенты.'}
+                {'ingredients': 'Укажите хотябы один игредиент.'},
+                code=status.HTTP_400_BAD_REQUEST
             )
 
         unique_ingredients = set()
         for ingredient in ingredients:
             if not Ingredient.objects.filter(id=ingredient['id']).exists():
                 raise serializers.ValidationError(
-                    {'ingredients': 'Указан не существующий ингредиент.'}
+                    {'ingredients': 'Указан не существующий ингредиент.'},
+                    code=status.HTTP_404_NOT_FOUND
                 )
             if ingredient['amount'] < 1:
                 raise serializers.ValidationError(
-                    {'amount': 'Значение должно быть больше 0.'}
+                    {'amount': 'Значение должно быть больше 0.'},
+                    code=status.HTTP_400_BAD_REQUEST
                 )
             unique_ingredients.add(ingredient['id'])
 
         if len(ingredients) != len(unique_ingredients):
             raise serializers.ValidationError(
-                {'ingredients': 'Ингридиенты не должны дублироваться.'}
+                {'ingredients': 'Ингридиенты не должны дублироваться.'},
+                code=status.HTTP_400_BAD_REQUEST
             )
 
         return ingredients
 
     def validate_tags(self, tags):
-
         if not tags:
             raise serializers.ValidationError(
-                {'tags': 'Укажите тег.'}
+                {'tags': 'Укажите хотябы один тег.'},
+                code=status.HTTP_400_BAD_REQUEST
             )
 
         if len(set(tags)) != len(tags):
             raise serializers.ValidationError(
-                {'tags': 'Теги не должны дублироваться.'}
+                {'tags': 'Теги не должны дублироваться.'},
+                code=status.HTTP_400_BAD_REQUEST
             )
 
         return tags
@@ -406,10 +401,24 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
         if image is None:
             raise serializers.ValidationError(
-                {'image': 'Загрузите картинку вашего рецепта.'}
+                {'image': 'Загрузите картинку вашего рецепта.'},
+                code=status.HTTP_400_BAD_REQUEST
             )
 
         return image
+
+    def validate(self, data):
+        fields = [
+            'ingredients', 'tags', 'name', 'text', 'image', 'cooking_time'
+        ]
+        for field in fields:
+            if field not in data:
+                raise serializers.ValidationError(
+                    {f'{field}': f'Укажите {field}.'},
+                    code=status.HTTP_400_BAD_REQUEST
+                )
+
+        return super().validate(data)
 
     def set_tags_and_ingredients(self, recipe, tags, ingredients):
         recipe.tags.set(tags)
@@ -434,13 +443,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
+
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
 
         RecipeIngredient.objects.filter(
             recipe=instance,
             ingredient__in=instance.ingredients.all()
-        ).delete()
+        )
 
         self.set_tags_and_ingredients(instance, tags, ingredients)
 
