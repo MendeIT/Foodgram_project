@@ -451,7 +451,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         RecipeIngredient.objects.filter(
             recipe=instance,
             ingredient__in=instance.ingredients.all()
-        )
+        ).delete()
 
         self.set_tags_and_ingredients(instance, tags, ingredients)
 
