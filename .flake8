@@ -5,7 +5,9 @@ ignore =
     I001,
     I003,
     I004,
-    I005
+    I005,
+    D104,
+    D100,
 exclude = 
     tests/,
     */migrations/,
@@ -13,3 +15,6 @@ exclude =
     */venv/,
     env/,
     */env/
+per-file-ignores =
+    ./manage.py:Q000,
+    */apps.py:D101

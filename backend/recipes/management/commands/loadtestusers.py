@@ -9,7 +9,7 @@ from users.models import User
 
 
 class Command(BaseCommand):
-    help = "Load 3 test users in DB (.csv)."
+    help = 'Load 3 test users in DB (.csv).'
 
     def handle(self, *args, **kwargs):
         self.stdout.write(self.style.SUCCESS(
@@ -23,9 +23,9 @@ class Command(BaseCommand):
                 rows = csv.reader(f)
                 for row in tqdm(
                     rows,
-                    desc="Процесс загрузки тестовых пользователей:",
+                    desc='Процесс загрузки тестовых пользователей:',
                     ncols=100,
-                    unit=" users"
+                    unit=' users'
                 ):
                     User.objects.get_or_create(
                         username=row[0],

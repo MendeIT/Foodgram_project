@@ -68,6 +68,6 @@ class RecipeAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs.select_related(
                 'author').prefetch_related(
-                'tags').prefetch_related("ingredients")
+                'tags').prefetch_related('ingredients')
 
         return qs.filter(author=request.user)

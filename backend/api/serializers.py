@@ -22,7 +22,7 @@ class UserListSerializer(UserSerializer):
             'username',
             'first_name',
             'last_name',
-            'is_subscribed'
+            'is_subscribed',
         ]
 
     def get_is_subscribed(self, data):
@@ -46,13 +46,13 @@ class UserCreateSerializer(UserCreateSerializer):
             'username',
             'first_name',
             'last_name',
-            'password'
+            'password',
         ]
         validators = [
             UniqueTogetherValidator(
                 queryset=User.objects.all(),
                 fields=['email', 'username'],
-                message='Пользователь с такми логином уже существует.'
+                message='Пользователь с такми логином уже существует.',
             )
         ]
         extra_kwargs = {
@@ -165,8 +165,9 @@ class AuthorSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, data):
         request = self.context.get('request')
-        limit = (False if request.GET is None
-                 else request.GET.get('recipes_limit'))
+        limit = (
+            False if request.GET is None else request.GET.get('recipes_limit')
+        )
         recipes_all = data.recipes.all()
         recipes = recipes_all[:int(limit)] if limit else recipes_all
 
@@ -422,13 +423,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def set_tags_and_ingredients(self, recipe, tags, ingredients):
         recipe.tags.set(tags)
-        RecipeIngredient.objects.bulk_create(
-            [RecipeIngredient(
+        RecipeIngredient.objects.bulk_create([
+            RecipeIngredient(
                 recipe=recipe,
                 ingredient_id=ingredient['id'],
                 amount=ingredient['amount']
-            ) for ingredient in ingredients]
-        )
+            ) for ingredient in ingredients
+        ])
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')

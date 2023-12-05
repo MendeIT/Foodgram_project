@@ -1,8 +1,7 @@
 from django.conf import settings
 from django.db.models import Sum, Count
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -63,8 +62,7 @@ class UserViewSet(CreateModelMixin,
         )
 
         return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
+            serializer.data, status=status.HTTP_200_OK
         )
 
     @action(
@@ -109,7 +107,7 @@ class UserViewSet(CreateModelMixin,
         permission_classes=[IsAuthenticated]
     )
     def subscribe(self, request, **kwargs):
-        author = get_object_or_404(User, pk=kwargs['pk'])
+        author = self.get_object()
 
         if request.method == 'POST':
 
@@ -137,14 +135,15 @@ class UserViewSet(CreateModelMixin,
             )
 
         elif request.method == 'DELETE':
+            unsubscribe_author = author.following.filter(
+                user=request.user
+            ).delete()
 
-            if not author.following.filter(user=request.user).exists():
+            if not unsubscribe_author[0]:
                 return Response(
                     {'errors': 'У Вас нет подписки на данного автора.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
-            author.following.filter(user=request.user).delete()
 
             return Response(
                 {'detail': 'Успешная отписка'},
@@ -193,22 +192,23 @@ class RecipeViewSet(ModelViewSet):
     @action(
         detail=True,
         methods=['post', 'delete'],
-        permission_classes=[IsAuthorOrReadOnlyPermission]
+        permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, **kwargs):
 
         if request.method == 'POST':
 
             if not Recipe.objects.filter(id=kwargs['pk']).exists():
-                return Response(
-                    {'errors': (
+                return Response({
+                    'errors': (
                         'Нельзя добавить '
                         'несуществующий рецепт в избранное.'
-                    )},
+                    )
+                },
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            recipe = Recipe.objects.get(id=kwargs['pk'])
+            recipe = self.get_object()
 
             if recipe.favorites.filter(user=request.user).exists():
                 return Response(
@@ -222,6 +222,7 @@ class RecipeViewSet(ModelViewSet):
                 context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
+
             Favorites.objects.create(user=request.user, recipe=recipe)
 
             return Response(
@@ -229,15 +230,14 @@ class RecipeViewSet(ModelViewSet):
             )
 
         if request.method == 'DELETE':
-            recipe = get_object_or_404(Recipe, id=kwargs['pk'])
+            recipe = self.get_object()
+            del_favorites = recipe.favorites.filter(user=request.user).delete()
 
-            if not recipe.favorites.filter(user=request.user).exists():
+            if not del_favorites[0]:
                 return Response(
                     {'errors': 'В Избранном нет данного рецепта.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
-            recipe.favorites.filter(user=request.user).delete()
 
             return Response(
                 {'detail': 'Рецепт успешно удален из избранного.'},
@@ -247,7 +247,7 @@ class RecipeViewSet(ModelViewSet):
     @action(
         detail=True,
         methods=['post', 'delete'],
-        permission_classes=[IsAuthorOrReadOnlyPermission],
+        permission_classes=[IsAuthenticated],
         pagination_class=None
     )
     def shopping_cart(self, request, **kwargs):
@@ -255,15 +255,16 @@ class RecipeViewSet(ModelViewSet):
         if request.method == 'POST':
 
             if not Recipe.objects.filter(id=kwargs['pk']).exists():
-                return Response(
-                    {'errors': (
+                return Response({
+                    'errors': (
                         'Нельзя добавить '
                         'несуществующий рецепт в корзину.'
-                    )},
+                    )
+                },
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            recipe = Recipe.objects.get(id=kwargs['pk'])
+            recipe = self.get_object()
 
             if recipe.shoppingcart.filter(user=request.user).exists():
                 return Response(
@@ -274,7 +275,7 @@ class RecipeViewSet(ModelViewSet):
             serializer = RecipeSerializer(
                 recipe,
                 data=request.data,
-                context={"request": request}
+                context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
 
@@ -285,20 +286,35 @@ class RecipeViewSet(ModelViewSet):
             )
 
         if request.method == 'DELETE':
-            recipe = get_object_or_404(Recipe, id=kwargs['pk'])
+            recipe = self.get_object()
+            del_recipe_shoppingcart = recipe.shoppingcart.filter(
+                user=request.user
+            ).delete()
 
-            if not recipe.shoppingcart.filter(user=request.user).exists():
+            if not del_recipe_shoppingcart[0]:
                 return Response(
                     {'errors': 'В корзине нет данного рецепта.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            recipe.shoppingcart.filter(user=request.user).delete()
-
             return Response(
                 {'detail': 'Рецепт удален из корзины.'},
                 status=status.HTTP_204_NO_CONTENT
             )
+
+    def create_file_txt_for_download(self, ingredients):
+        lst_ingredients = [
+            f'{ingredient[0]} --- {ingredient[1]} {ingredient[2]}.'
+            for ingredient in ingredients
+        ]
+        text_for_download = 'Cписок покупок:\n' + '\n'.join(lst_ingredients)
+
+        return FileResponse(
+            text_for_download,
+            as_attachment=True,
+            filename=settings.FILE_NAME,
+            headers={'Content-Type': 'text/plain'}
+        )
 
     @action(
         detail=False,
@@ -317,16 +333,5 @@ class RecipeViewSet(ModelViewSet):
                 'ingredient__measurement_unit'
             )
         )
-        lst_ingredients = [
-            f'{ingredient[0]} --- {ingredient[1]} {ingredient[2]}.'
-            for ingredient in ingredients
-        ]
-        file = HttpResponse(
-            'Cписок покупок:\n' + '\n'.join(lst_ingredients),
-            content_type='text/plain', charset='utf-8'
-        )
-        file['Content-Disposition'] = (
-            f'attachment; filename={settings.FILE_NAME}'
-        )
 
-        return file
+        return self.create_file_txt_for_download(ingredients)
