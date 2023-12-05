@@ -6,8 +6,10 @@ from users.models import Follow, User
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('id', 'username', 'first_name', 'last_name',
-                    'email', 'password', 'date_joined', 'last_login')
+    list_display = (
+        'id', 'username', 'first_name', 'last_name',
+        'email', 'password', 'date_joined', 'last_login'
+    )
     list_display_links = ['username']
     list_editable = ('password', 'first_name', 'last_name')
     search_fields = ('username', 'first_name', 'last_name', 'email')

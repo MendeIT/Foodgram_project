@@ -9,7 +9,7 @@ from recipes.models import Ingredient, Tag
 
 
 class Command(BaseCommand):
-    help = "Load model Ingredinets in DB (.csv)."
+    help = 'Load model Ingredinets in DB (.csv).'
 
     def handle(self, *args, **kwargs):
         self.stdout.write(self.style.SUCCESS(
@@ -26,9 +26,9 @@ class Command(BaseCommand):
                 rows = csv.reader(f)
                 for row in tqdm(
                     rows,
-                    desc="Процесс загрузки ингредиентов:",
+                    desc='Процесс загрузки ингредиентов:',
                     ncols=100,
-                    unit=" ingredients"
+                    unit=' ingredients'
                 ):
                     Ingredient.objects.get_or_create(
                         name=row[0],
@@ -38,9 +38,9 @@ class Command(BaseCommand):
                 rows = csv.reader(f_tags)
                 for row in tqdm(
                     rows,
-                    desc="Процесс загрузки тегов:",
+                    desc='Процесс загрузки тегов:',
                     ncols=100,
-                    unit=" tags"
+                    unit=' tags'
                 ):
                     Tag.objects.get_or_create(
                         name=row[0],
