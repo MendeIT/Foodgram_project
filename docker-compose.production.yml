@@ -4,6 +4,7 @@ services:
   db:
     image: postgres:13.10
     container_name: foodgram_db
+    restart: always
     env_file:
       - .env
     volumes:
