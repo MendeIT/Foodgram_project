@@ -1,10 +1,10 @@
 import csv
 import os
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from tqdm import tqdm
 
-from django.conf import settings
 from users.models import User
 
 

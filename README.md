@@ -13,11 +13,11 @@
 
 > ### Технологии
 #### Архитектура RESTful API
-|Language|Framework|HTTP Server/Client|Сontainerization|CI/CD|Frontend|
-|--------|---------|------------------|----------------|-----|--------|
-|Python  |Django   |          Gunicorn| Docker|GitHub Actions| Node.js|
-|        |Django REST Framework| Nginx|  Docker compose|     |   React|
-|        |         |           Postman|                |     |        |
+|Language|Framework|WSGI/HTTP Server/Client|Сontainerization|CI/CD|Frontend|
+|--------|---------|-----------------------|----------------|-----|--------|
+|Python  |Django   |               Gunicorn| Docker|GitHub Actions| Node.js|
+|        |Django REST Framework|      Nginx|  Docker compose|     |   React|
+|        |         |                Postman|                |     |        |
 
 #### Документация к веб-приложению: https://foodgram.twilightparadox.com/redoc/
 ---
