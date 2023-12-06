@@ -135,18 +135,18 @@ class UserViewSet(CreateModelMixin,
             )
 
         elif request.method == 'DELETE':
-            unsubscribe_author = author.following.filter(
+            number_of_objects_removed, _ = author.following.filter(
                 user=request.user
             ).delete()
 
-            if not unsubscribe_author[0]:
+            if number_of_objects_removed == 0:
                 return Response(
                     {'errors': 'У Вас нет подписки на данного автора.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
             return Response(
-                {'detail': 'Успешная отписка'},
+                {'detail': 'Успешная отписка.'},
                 status=status.HTTP_204_NO_CONTENT
             )
 
@@ -251,7 +251,6 @@ class RecipeViewSet(ModelViewSet):
         pagination_class=None
     )
     def shopping_cart(self, request, **kwargs):
-
         if request.method == 'POST':
 
             if not Recipe.objects.filter(id=kwargs['pk']).exists():
@@ -303,11 +302,13 @@ class RecipeViewSet(ModelViewSet):
             )
 
     def create_file_txt_for_download(self, ingredients):
-        lst_ingredients = [
+        formatted_list_ingredients = [
             f'{ingredient[0]} --- {ingredient[1]} {ingredient[2]}.'
             for ingredient in ingredients
         ]
-        text_for_download = 'Cписок покупок:\n' + '\n'.join(lst_ingredients)
+        text_for_download = 'Cписок покупок:\n' + '\n'.join(
+            formatted_list_ingredients
+        )
 
         return FileResponse(
             text_for_download,

@@ -165,9 +165,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, data):
         request = self.context.get('request')
-        limit = (
-            False if request.GET is None else request.GET.get('recipes_limit')
-        )
+        limit = request.GET.get('recipes_limit')
         recipes_all = data.recipes.all()
         recipes = recipes_all[:int(limit)] if limit else recipes_all
 
@@ -399,7 +397,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return tags
 
     def validate_image(self, image):
-
         if image is None:
             raise serializers.ValidationError(
                 {'image': 'Загрузите картинку вашего рецепта.'},
@@ -444,7 +441,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
 
@@ -454,8 +450,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ).delete()
 
         self.set_tags_and_ingredients(instance, tags, ingredients)
-
-        instance.save()
 
         return super().update(instance, validated_data)
 
