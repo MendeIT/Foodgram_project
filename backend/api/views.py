@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db import IntegrityError
 from django.db.models import Sum, Count
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import FileResponse
@@ -91,7 +92,9 @@ class UserViewSet(CreateModelMixin,
     def subscriptions(self, request):
         queryset = User.objects.filter(
             following__user=request.user
-        ).annotate(recipes_count=Count('recipes'))
+        ).annotate(
+            recipes_count=Count('recipes')
+        )
 
         page = self.paginate_queryset(queryset)
 
@@ -111,12 +114,6 @@ class UserViewSet(CreateModelMixin,
 
         if request.method == 'POST':
 
-            if author.following.filter(user=request.user).exists():
-                return Response(
-                    {'errors': 'Вы уже подписаны на данного автора.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
             if request.user == author:
                 return Response(
                     {'errors': 'Нельзя подписаться на самого себя.'},
@@ -128,11 +125,17 @@ class UserViewSet(CreateModelMixin,
             )
             serializer.is_valid(raise_exception=True)
 
-            Follow.objects.create(user=request.user, author=author)
-
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED
-            )
+            try:
+                Follow.objects.create(user=request.user, author=author)
+            except IntegrityError:
+                return Response(
+                    {'errors': 'Вы уже подписаны на данного автора.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED
+                )
 
         elif request.method == 'DELETE':
             number_of_objects_removed, _ = author.following.filter(
@@ -210,12 +213,6 @@ class RecipeViewSet(ModelViewSet):
 
             recipe = self.get_object()
 
-            if recipe.favorites.filter(user=request.user).exists():
-                return Response(
-                    {'errors': 'Рецепт уже добавлен в избранное.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
             serializer = RecipeSerializer(
                 recipe,
                 data=request.data,
@@ -223,17 +220,25 @@ class RecipeViewSet(ModelViewSet):
             )
             serializer.is_valid(raise_exception=True)
 
-            Favorites.objects.create(user=request.user, recipe=recipe)
-
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED
-            )
+            try:
+                Favorites.objects.create(user=request.user, recipe=recipe)
+            except IntegrityError:
+                return Response(
+                    {'errors': 'Рецепт уже добавлен в избранное.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED
+                )
 
         if request.method == 'DELETE':
             recipe = self.get_object()
-            del_favorites = recipe.favorites.filter(user=request.user).delete()
+            number_of_objects_removed, _ = recipe.favorites.filter(
+                user=request.user
+            ).delete()
 
-            if not del_favorites[0]:
+            if number_of_objects_removed == 0:
                 return Response(
                     {'errors': 'В Избранном нет данного рецепта.'},
                     status=status.HTTP_400_BAD_REQUEST
@@ -265,12 +270,6 @@ class RecipeViewSet(ModelViewSet):
 
             recipe = self.get_object()
 
-            if recipe.shoppingcart.filter(user=request.user).exists():
-                return Response(
-                    {'errors': 'Рецепт уже есть в списке продуктов.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
             serializer = RecipeSerializer(
                 recipe,
                 data=request.data,
@@ -278,19 +277,25 @@ class RecipeViewSet(ModelViewSet):
             )
             serializer.is_valid(raise_exception=True)
 
-            ShoppingCart.objects.create(user=request.user, recipe=recipe)
-
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED
-            )
+            try:
+                ShoppingCart.objects.create(user=request.user, recipe=recipe)
+            except IntegrityError:
+                return Response(
+                    {'errors': 'Рецепт уже есть в списке продуктов.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED
+                )
 
         if request.method == 'DELETE':
             recipe = self.get_object()
-            del_recipe_shoppingcart = recipe.shoppingcart.filter(
+            number_of_objects_removed, _ = recipe.shoppingcart.filter(
                 user=request.user
             ).delete()
 
-            if not del_recipe_shoppingcart[0]:
+            if number_of_objects_removed == 0:
                 return Response(
                     {'errors': 'В корзине нет данного рецепта.'},
                     status=status.HTTP_400_BAD_REQUEST
