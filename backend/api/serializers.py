@@ -407,7 +407,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         fields = [
-            'ingredients', 'tags', 'name', 'text', 'image', 'cooking_time'
+            'ingredients', 'tags', 'name', 'text', 'cooking_time'
         ]
         for field in fields:
             if field not in data:
