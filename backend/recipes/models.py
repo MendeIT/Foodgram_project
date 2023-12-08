@@ -1,8 +1,7 @@
 from django.core.validators import (MaxValueValidator,
-                                    MinValueValidator)
+                                    MinValueValidator,
+                                    RegexValidator)
 from django.db import models
-
-from colorfield.fields import ColorField
 
 from users.models import User
 
@@ -42,18 +41,18 @@ class Ingredient(models.Model):
 class Tag(models.Model):
     """Модель тегов."""
 
-    COLOR_PALETTE = [
-        ('#c45824', 'терракотовый', ),
-        ('#4b0082', 'индиго', ),
-        ('#FF7F50', 'коралловый', ),
-        ('#009B77', 'изумруд', ),
-    ]
-
     name = models.CharField(
         max_length=200,
         verbose_name='Имя тега'
     )
-    color = ColorField(format='hex', samples=COLOR_PALETTE)
+    color = models.CharField(
+        max_length=7,
+        verbose_name='Цвет тега',
+        validators=[
+            RegexValidator(regex=r'^\#([a-fA-F0-9]{6})$',
+                           message='Цвет не соответствует формату HEX.')
+        ]
+    )
     slug = models.SlugField(
         max_length=200,
         unique=True,

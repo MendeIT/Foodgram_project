@@ -9,7 +9,12 @@ DATABASES = {
 
 INTERNAL_IPS = ['127.0.0.1']
 
-settings.INSTALLED_APPS.append('debug_toolbar')
+list_develop_settings = [
+    'debug_toolbar',
+    'django_extensions',
+]
+
+settings.INSTALLED_APPS.extend(list_develop_settings)
 
 LOGGING = {
     'version': 1,
