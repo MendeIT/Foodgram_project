@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.conf import settings
 from django.db import IntegrityError
 from django.db.models import Sum, Count
@@ -307,12 +309,15 @@ class RecipeViewSet(ModelViewSet):
 
     def create_file_txt_for_download(self, ingredients):
         formatted_list_ingredients = [
-            f'{ingredient[0]} --- {ingredient[1]} {ingredient[2]}.'
+            f'{ingredient[0]} ({ingredient[2]}) — {ingredient[1]}.'
             for ingredient in ingredients
         ]
+        now = datetime.now()
+        time = now.strftime('%d.%m.%Y %H:%M:%S')
+
         text_for_download = 'Cписок покупок:\n' + '\n'.join(
             formatted_list_ingredients
-        )
+        ) + f'\n\nДата создания списка: {time}'
 
         return FileResponse(
             text_for_download,
