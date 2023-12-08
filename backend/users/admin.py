@@ -13,8 +13,8 @@ class UserAdmin(BaseUserAdmin):
     list_display_links = ['username']
     list_editable = ['password', 'first_name', 'last_name']
     search_fields = ['username', 'first_name', 'last_name', 'email']
-    list_filter = ['first_name', 'last_name']
-    ordering = ['id']
+    list_filter = ['username', 'email']
+    ordering = ['date_joined']
     date_hierarchy = 'date_joined'
     list_per_page = 10
 

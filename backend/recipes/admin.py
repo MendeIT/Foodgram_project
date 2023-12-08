@@ -10,7 +10,7 @@ from recipes.models import (Favorites,
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'measurement_unit']
+    list_display = ['name', 'measurement_unit']
     list_display_links = ['name']
     list_editable = ['measurement_unit']
     search_fields = ['name']
@@ -61,14 +61,20 @@ class IngredientInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'text', 'pub_date', 'author']
+    list_display = ['name', 'author', 'favorites_counter']
     list_display_links = ['name']
-    list_filter = ['pub_date']
+    list_filter = ['name', 'author', 'tags']
     search_fields = ['name', 'author']
     date_hierarchy = 'pub_date'
     inlines = [IngredientInline]
     filter_horizontal = ['ingredients']
     list_per_page = 10
+
+    @admin.display(
+        description='Кол-во добавлений рецепта в избранное'
+    )
+    def favorites_counter(self, obj):
+        return obj.favorites.count()
 
     def get_queryset(self, request):
         qs = super(RecipeAdmin, self).get_queryset(request)
