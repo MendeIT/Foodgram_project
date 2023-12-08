@@ -42,6 +42,8 @@ class UserViewSet(CreateModelMixin,
                   ListModelMixin,
                   RetrieveModelMixin,
                   GenericViewSet):
+    """Представление пользователей."""
+
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     pagination_class = CustomPaginator
@@ -159,6 +161,8 @@ class UserViewSet(CreateModelMixin,
 class IngredientViewSet(ListModelMixin,
                         RetrieveModelMixin,
                         GenericViewSet):
+    """Представление ингредиентов."""
+
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny]
@@ -170,6 +174,8 @@ class IngredientViewSet(ListModelMixin,
 class TagViewSet(ListModelMixin,
                  RetrieveModelMixin,
                  GenericViewSet):
+    """Представление тегов."""
+
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [AllowAny]
@@ -177,7 +183,7 @@ class TagViewSet(ListModelMixin,
 
 
 class RecipeViewSet(ModelViewSet):
-    """Модель представления рецептов."""
+    """Представление рецептов."""
 
     queryset = Recipe.objects.select_related(
         'author').prefetch_related('tags', 'ingredients')
