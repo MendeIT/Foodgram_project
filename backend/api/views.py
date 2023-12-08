@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import IntegrityError
 from django.db.models import Sum, Count
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import FileResponse
+from django.http import FileResponse, Http404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -198,10 +198,10 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, **kwargs):
-
-        if request.method == 'POST':
-
-            if not Recipe.objects.filter(id=kwargs['pk']).exists():
+        try:
+            recipe = self.get_object()
+        except Http404:
+            if request.method == 'POST':
                 return Response({
                     'errors': (
                         'Нельзя добавить '
@@ -210,9 +210,9 @@ class RecipeViewSet(ModelViewSet):
                 },
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            raise Http404
 
-            recipe = self.get_object()
-
+        if request.method == 'POST':
             serializer = RecipeSerializer(
                 recipe,
                 data=request.data,
@@ -233,7 +233,6 @@ class RecipeViewSet(ModelViewSet):
                 )
 
         if request.method == 'DELETE':
-            recipe = self.get_object()
             number_of_objects_removed, _ = recipe.favorites.filter(
                 user=request.user
             ).delete()
@@ -256,9 +255,10 @@ class RecipeViewSet(ModelViewSet):
         pagination_class=None
     )
     def shopping_cart(self, request, **kwargs):
-        if request.method == 'POST':
-
-            if not Recipe.objects.filter(id=kwargs['pk']).exists():
+        try:
+            recipe = self.get_object()
+        except Http404:
+            if request.method == 'POST':
                 return Response({
                     'errors': (
                         'Нельзя добавить '
@@ -267,9 +267,9 @@ class RecipeViewSet(ModelViewSet):
                 },
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            raise Http404
 
-            recipe = self.get_object()
-
+        if request.method == 'POST':
             serializer = RecipeSerializer(
                 recipe,
                 data=request.data,
@@ -290,7 +290,6 @@ class RecipeViewSet(ModelViewSet):
                 )
 
         if request.method == 'DELETE':
-            recipe = self.get_object()
             number_of_objects_removed, _ = recipe.shoppingcart.filter(
                 user=request.user
             ).delete()
