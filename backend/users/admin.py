@@ -7,14 +7,14 @@ from users.models import Follow, User
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = [
-        'id', 'username', 'first_name', 'last_name',
+        'username', 'first_name', 'last_name',
         'email', 'password', 'date_joined', 'last_login'
     ]
     list_display_links = ['username']
-    list_editable = ['password', 'first_name', 'last_name']
+    list_editable = ['password']
     search_fields = ['username', 'first_name', 'last_name', 'email']
     list_filter = ['username', 'email']
-    ordering = ['date_joined']
+    ordering = ['-date_joined']
     date_hierarchy = 'date_joined'
     list_per_page = 10
 
